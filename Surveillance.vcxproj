@@ -101,11 +101,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="xsdl.cpp" />
+    <ClCompile Include="xvideo_view.cpp" />
     <QtRcc Include="Surveillance.qrc" />
     <QtUic Include="Surveillance.ui" />
     <QtMoc Include="Surveillance.h" />
     <ClCompile Include="Surveillance.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="xsdl.h" />
+    <ClInclude Include="xvideo_view.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
