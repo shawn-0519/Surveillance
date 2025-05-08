@@ -156,3 +156,14 @@ bool XSDL::Draw(const unsigned char* data, int linesize)
     
     return false;
 }
+
+void XSDL::Close()
+{
+
+
+}
+
+void XSDL::IsExit()
+{
+
+}

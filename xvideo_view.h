@@ -38,10 +38,16 @@ public:
 	/// <param name="linsize">  一行数据的字节数，对于YUV420P就是Y一行字节数，linesize<=0 就根据宽度和像素格式自动算出大小
 	/// <returns>  是否创建成功，true为成功，false为失败
 	virtual bool Draw(const unsigned char*data,int linsize = 0) = 0;
+
+	//清理所有申请的资源，包括关闭窗口
+	virtual void Close() = 0;
+
+	//处理窗口退出事件
+	virtual void IsExit() = 0;
 	
-	//XVideoView();
-	//virtual ~XVideoView();
-	void Scale(int w, int h) {
+	//显示缩放
+	void Scale(int w, int h)
+	{
 		scale_w_ = w;
 		scale_h_ = h;
 	}
@@ -50,7 +56,7 @@ protected:
 	int width_ = 0;     //材质宽高
 	int height_ = 0;
 	Format fmt_ = RGBA;  //像素格式
-	std::mutex mtx_;
+	std::mutex mtx_;    //确保线程安全
 	int scale_w_ = 0;   //显示大小
 	int scale_h_ = 0;
 
