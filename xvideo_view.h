@@ -37,17 +37,22 @@ public:
 	/// <param name="data">  渲染的二进制数据
 	/// <param name="linsize">  一行数据的字节数，对于YUV420P就是Y一行字节数，linesize<=0 就根据宽度和像素格式自动算出大小
 	/// <returns>  是否创建成功，true为成功，false为失败
-	virtual bool Draw(const char*data,int linsize = 0) = 0;
-	
+	virtual bool Draw(const unsigned char*data,int linsize = 0) = 0;
 	
 	//XVideoView();
 	//virtual ~XVideoView();
+	void Scale(int w, int h) {
+		scale_w_ = w;
+		scale_h_ = h;
+	}
 
 protected:
-	int width_ = 0;     //窗口宽高
+	int width_ = 0;     //材质宽高
 	int height_ = 0;
 	Format fmt_ = RGBA;  //像素格式
 	std::mutex mtx_;
+	int scale_w_ = 0;   //显示大小
+	int scale_h_ = 0;
 
 
 };

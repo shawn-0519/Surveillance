@@ -1,7 +1,9 @@
 #include "Surveillance.h"
 #include <QMessageBox>
 #include "xvideo_view.h"
+#include "xsdl.h"
 #include <fstream>
+#include <iostream>
 
 using namespace std;
 
@@ -17,6 +19,7 @@ static XVideoView* view = nullptr;
 void Surveillance::timerEvent(QTimerEvent* ev)
 {
     yuv_file.read((char*)yuv, sdl_width * sdl_height * 1.5);
+    view->Draw(yuv);
     //static unsigned char tmp = 255;
     //tmp--;  
     //for (int j = 0; j < sdl_height; j++)
@@ -61,10 +64,10 @@ Surveillance::Surveillance(QWidget* parent)
     ui.setupUi(this);
     sdl_width = 400;
     sdl_height = 300;
-    ui.label->resize(sdl_width, sdl_height);
+    //ui.label->resize(sdl_width, sdl_height);
     view = XVideoView::Create();
     view->Init(sdl_width, sdl_height,
-        XVideoView::YUV420P);
+        XVideoView::YUV420P, (void*)ui.label->winId());
     //初始化SDL
     //SDL_Init(SDL_INIT_VIDEO);
     ////创建窗口
@@ -82,6 +85,17 @@ Surveillance::Surveillance(QWidget* parent)
     startTimer(10);
 }
 
+void Surveillance::resizeEvent(QResizeEvent* ev)
+{
+    ui.label->resize(size());
+    ui.label->move(0, 0);
+    view->Scale(width(), height());
+
+    // 输出窗口和控件的大小
+    qDebug() << "this-size:" << this->width() << "x" << this->height();
+    qDebug() << "label-size:" << ui.label->width() << "x" << ui.label->height();
+}
+   
 Surveillance::~Surveillance()
 {}
 

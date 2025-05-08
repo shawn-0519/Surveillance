@@ -21,12 +21,12 @@ public:
 	// <summary>
 	// 渲染图像  线程安全
 	// <param name="data">  渲染的二进制数据
-	// <param name="linsize">  一行数据的字节数，对于YUV420P就是Y一行字节数，linesize<=0 就根据宽度和像素格式自动算出大小
+	// <param name="linesize">  一行数据的字节数，对于YUV420P就是Y一行字节数，linesize<=0 就根据宽度和像素格式自动算出大小
 	// <returns>  是否创建成功，true为成功，false为失败
-	bool Draw(const char* data, int linsize = 0);
+	bool Draw(const unsigned char* data, int linesize = 0);
 
 protected:
-	int width_ = 0;     //窗口宽高
+	int width_ = 0;     //材质宽高
 	int height_ = 0;
 	Format fmt_ = RGBA;  //像素格式
 	std::mutex mtx_;

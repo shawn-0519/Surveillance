@@ -11,7 +11,7 @@ public:
     Surveillance(QWidget *parent = nullptr);
     ~Surveillance();
     void timerEvent(QTimerEvent *ev)override;
-
+    void resizeEvent(QResizeEvent *ev)override;
 private:
     Ui::SurveillanceClass ui;
 };

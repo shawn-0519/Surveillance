@@ -21,6 +21,9 @@ static bool InitVideo()
         cout << SDL_GetError << endl;
         return false;
     }
+    //设定缩放算法，解决锯齿问题,线性插值算法
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+
     return true;
 }
 bool XSDL::Init(int w, int h, Format fmt, void* win_id)
@@ -68,8 +71,22 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
         return false;
     }
 
-    //3 创建材质（显存）
+    //3 创建材质（显存）默认RGBA8888
     unsigned int sdl_fmt = SDL_PIXELFORMAT_RGBA8888;
+    switch (fmt)
+    {
+    case XVideoView::RGBA:
+        break;
+    case XVideoView::ARGB:
+        sdl_fmt = SDL_PIXELFORMAT_ARGB32;
+        break;
+    case XVideoView::YUV420P:
+        sdl_fmt = SDL_PIXELFORMAT_IYUV;
+        break;
+    default:
+        break;
+    }
+
     texture_ = SDL_CreateTexture(render_,
         sdl_fmt,                        //像素格式
         SDL_TEXTUREACCESS_STREAMING,    //需要频繁修改的渲染（带锁）
@@ -84,7 +101,58 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
     return true;
 }
 
-bool XSDL::Draw(const char* data, int linsize)
+bool XSDL::Draw(const unsigned char* data, int linesize)
 {
+    if (!data)return false;
+    //容错
+    unique_lock<mutex> sdl_lock(mtx_);
+    if (!win_ || !render_ || !texture_ || width_ <= 0 || height_ <= 0)return false;
+
+    // 没有传递有效的 linesize,则根据当前的像素格式和宽度自动计算出合适的 linesize
+    if (linesize <= 0)
+    {
+        switch (fmt_)
+        {
+        case XVideoView::RGBA:
+        case XVideoView::ARGB:
+            linesize = width_ * 4;
+            break;
+        case XVideoView::YUV420P:
+            linesize = width_;
+            break;
+        default:
+            break;
+        }
+    }
+    if (linesize <= 0) return false;
+
+    //将内存中的像素数据更新到SDL的纹理
+    auto re = SDL_UpdateTexture(texture_, nullptr, data, linesize);
+    if (re != 0) {
+        cout << SDL_GetError << endl;
+        return false;
+    }
+
+    //清空当前渲染目标（通常是窗口）
+    re = SDL_RenderClear(render_);
+    if (scale_h_ <= 0)scale_h_ = height_;
+    if (scale_w_ <= 0)scale_w_ = width_;
+
+    SDL_Rect rect;
+    rect.w = scale_w_;//渲染的宽高，可缩放
+    rect.h = scale_h_;
+    rect.x = 0;
+    rect.y = 0;
+
+    //将一个纹理（Texture）的内容复制到当前渲染目标（Renderer）
+    re = SDL_RenderCopy(render_, texture_,NULL, &rect);
+    if (re != 0) {
+        cout << SDL_GetError << endl;
+        return false;
+    }
+
+    //将之前所有的渲染操作（如 RenderCopy）显示到屏幕上
+    SDL_RenderPresent(render_);
+    
     return false;
 }
