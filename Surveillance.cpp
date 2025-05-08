@@ -19,6 +19,12 @@ static XVideoView* view = nullptr;
 void Surveillance::timerEvent(QTimerEvent* ev)
 {
     yuv_file.read((char*)yuv, sdl_width * sdl_height * 1.5);
+    if (view->IsExit())
+    {
+        view->Close();
+        exit(0);
+    }
+
     view->Draw(yuv);
 }
 
@@ -42,10 +48,10 @@ Surveillance::Surveillance(QWidget* parent)
     cout << "窗口大小：" << this->height() << endl;
     //ui.label->resize(sdl_width, sdl_height);
     view = XVideoView::Create();
-    view->Init(sdl_width, sdl_height,
-        XVideoView::YUV420P, (void*)ui.label->winId());
     
-
+    view->Init(sdl_width, sdl_height,XVideoView::YUV420P, (void*)ui.label->winId());
+    view->Close();
+    view->Init(sdl_width, sdl_height, XVideoView::YUV420P);
     yuv = new unsigned char[sdl_width * sdl_height * pix_size];
     startTimer(10);
 }
@@ -54,7 +60,7 @@ void Surveillance::resizeEvent(QResizeEvent* ev)
 {
     ui.label->resize(size());
     ui.label->move(0, 0);
-    view->Scale(width(), height());
+    //view->Scale(width(), height());
 
     // 输出窗口和控件的大小
     cout << "this-size:" << this->width() << "x" << this->height();

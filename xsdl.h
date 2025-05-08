@@ -29,7 +29,7 @@ public:
 	void Close()override;
 
 	//处理窗口退出事件
-	void IsExit()override;
+	bool IsExit()override;
 
 private:
 	SDL_Window* win_ = nullptr;

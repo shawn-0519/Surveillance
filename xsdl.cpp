@@ -38,6 +38,11 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
     height_ = h;
     fmt_ = fmt;
     
+    if (texture_)
+        SDL_DestroyTexture(texture_);
+    if (render_)
+        SDL_DestroyRenderer(render_);
+
     //1 创建窗口
     if(!win_)
     {
@@ -67,7 +72,7 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
     render_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
     if (!render_)
     {
-        cerr << SDL_GetError << endl;
+        cout << SDL_GetError << endl;
         return false;
     }
 
@@ -135,17 +140,19 @@ bool XSDL::Draw(const unsigned char* data, int linesize)
 
     //清空当前渲染目标（通常是窗口）
     re = SDL_RenderClear(render_);
-    if (scale_h_ <= 0)scale_h_ = height_;
-    if (scale_w_ <= 0)scale_w_ = width_;
 
     SDL_Rect rect;
-    rect.w = scale_w_;//渲染的宽高，可缩放
-    rect.h = scale_h_;
-    rect.x = 0;
-    rect.y = 0;
+    SDL_Rect* prect = nullptr;
+    if (scale_w_ > 0) //用户手动设置缩放
+    {
+        rect.x = 0; rect.y = 0;
+        rect.w = scale_w_;//渲染的宽高，可缩放
+        rect.h = scale_h_;
+        prect = &rect;
+    }    
 
     //将一个纹理（Texture）的内容复制到当前渲染目标（Renderer）
-    re = SDL_RenderCopy(render_, texture_,NULL, &rect);
+    re = SDL_RenderCopy(render_, texture_,NULL, prect);
     if (re != 0) {
         cout << SDL_GetError << endl;
         return false;
@@ -159,11 +166,33 @@ bool XSDL::Draw(const unsigned char* data, int linesize)
 
 void XSDL::Close()
 {
-
+    //确保线程安全
+    unique_lock<mutex> sdl_lock(mtx_);
+    if (texture_)
+    {
+        SDL_DestroyTexture(texture_);
+        texture_ = nullptr;
+    }
+    if (render_)
+    {
+        SDL_DestroyRenderer(render_);
+        render_ = nullptr;
+    }
+    if (win_)
+    {
+        SDL_DestroyWindow(win_);
+        win_ = nullptr;
+    }
 
 }
 
-void XSDL::IsExit()
+bool XSDL::IsExit()
 {
-
+    SDL_Event ev;
+    //等待事件队列中出现新事件，并将事件信息写入 ev
+    SDL_WaitEventTimeout(&ev, 1);
+    if (ev.type == SDL_QUIT) {
+        return true;
+    }
+    return false;
 }

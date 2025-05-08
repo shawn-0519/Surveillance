@@ -43,7 +43,7 @@ public:
 	virtual void Close() = 0;
 
 	//处理窗口退出事件
-	virtual void IsExit() = 0;
+	virtual bool IsExit() = 0;
 	
 	//显示缩放
 	void Scale(int w, int h)
