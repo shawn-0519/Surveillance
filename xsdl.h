@@ -24,7 +24,11 @@ public:
 	// <param name="linesize">  一行数据的字节数，对于YUV420P就是Y一行字节数，linesize<=0 就根据宽度和像素格式自动算出大小
 	// <returns>  是否创建成功，true为成功，false为失败
 	bool Draw(const unsigned char* data, int linesize = 0)override;
-
+	bool Draw(
+		const unsigned char* y, int y_pitch,
+		const unsigned char* u, int u_pitch,
+		const unsigned char* v, int v_pitch
+	)override;
 	//清理所有申请的资源，包括关闭窗口
 	void Close()override;
 

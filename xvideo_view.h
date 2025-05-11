@@ -1,6 +1,6 @@
 #pragma once
 #include <mutex>
-
+struct AVFrame;
 ////////////////////////////////////
 /// 视频渲染接口类
 /// 隐藏SDL实现
@@ -38,6 +38,13 @@ public:
 	/// <param name="linsize">  一行数据的字节数，对于YUV420P就是Y一行字节数，linesize<=0 就根据宽度和像素格式自动算出大小
 	/// <returns>  是否创建成功，true为成功，false为失败
 	virtual bool Draw(const unsigned char*data,int linsize = 0) = 0;
+	virtual bool Draw(
+		const unsigned char* y, int y_pitch,
+		const unsigned char* u, int u_pitch,
+		const unsigned char* v, int v_pitch
+			) = 0;
+	
+	virtual bool DrawFrame(AVFrame* frame);
 
 	//清理所有申请的资源，包括关闭窗口
 	virtual void Close() = 0;
@@ -52,7 +59,17 @@ public:
 		scale_h_ = h;
 	}
 
+	//定时器
+	void MSleep(unsigned int ms);
+
+	int render_fps() { return render_fps_; }
+
 protected:
+	
+	int render_fps_ = 0;       //显示帧率
+	long long beg_ms_ = 0;       //计时开始时间
+	int count_ = 0;              //统计显示次数
+
 	int width_ = 0;     //材质宽高
 	int height_ = 0;
 	Format fmt_ = RGBA;  //像素格式
