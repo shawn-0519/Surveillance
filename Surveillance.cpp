@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <QSpinBox>
 #include "xvideo_view.h"
 #include "xsdl.h"
 
@@ -22,6 +23,8 @@ static XVideoView* view = nullptr;
 static AVFrame* frame = nullptr;
 static QLabel* view_fps = nullptr;
 static long long file_size = 0;
+static QSpinBox* set_fps = nullptr;
+int fps = 25;
 void Surveillance::timerEvent(QTimerEvent* ev)
 {
     //yuv_file.read((char*)yuv, sdl_width * sdl_height * 1.5);
@@ -66,7 +69,9 @@ void Surveillance::View() {
     //只能在槽函数中调用
     view_fps->setText(ss.str().c_str());
     view_fps->adjustSize();// 宽度和高度自动根据实际内容调整
-    view_fps->setStyleSheet("background: transparent; color: black;"); // 颜色可自定义
+    //view_fps->setStyleSheet("background: transparent; color: black;"); // 颜色可自定义
+
+    fps = set_fps->value();//拿到播放帧率
 
     //cout << "ss:" << ss.str().c_str()<<" ";
 }
@@ -78,7 +83,11 @@ void Surveillance::Main()
     while(!is_exit_)
     {
         ViewS();
-        view->MSleep(40);
+        if (fps > 0) {
+            view->MSleep(1000/fps);
+        }
+        else
+            view->MSleep(10);
     }
 }
 
@@ -107,6 +116,12 @@ Surveillance::Surveillance(QWidget* parent)
     //显示fps的控件
     view_fps = new QLabel(this);
     view_fps->setText("fps:");
+
+    //设置用户手动调整窗口
+    set_fps = new QSpinBox(this);
+    set_fps->setValue(fps);
+    set_fps->move(200, 0);
+    set_fps->setRange(1, 250);
     
     
     sdl_width = 400;
