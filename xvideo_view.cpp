@@ -141,3 +141,7 @@ void MSleep(unsigned int ms)
            break;  
    }  
 }
+
+long long NowMs() {
+	return clock() / (CLOCKS_PER_SEC / 1000);
+}

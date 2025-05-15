@@ -6,6 +6,10 @@ struct AVFrame;
 //定时器
 void MSleep(unsigned int ms);
 
+//获取当前时间戳 毫秒
+long long NowMs();
+
+
 ////////////////////////////////////
 /// 视频渲染接口类
 /// 隐藏SDL实现
@@ -65,6 +69,8 @@ public:
 
 	//处理窗口退出事件
 	virtual bool IsExit() = 0;
+
+
 	
 	//显示缩放
 	void Scale(int w, int h)

@@ -14,7 +14,7 @@ extern"C" {
 #include <libavcodec/avcodec.h>
 }
 using namespace std;
-static std::vector<XVideoView*> views;
+static std::vector<XVideoView*> views;  //多路视频
 //static SDL_Window *sdl_win = nullptr;
 //static SDL_Renderer* sdl_render = nullptr;
 //static SDL_Texture* sdl_texture = nullptr;
@@ -35,11 +35,44 @@ void Surveillance::timerEvent(QTimerEvent* ev)
 
 void Surveillance::View() 
 {
+    //存放上次渲染的时间戳
+    static int last_pts[32] = { 0 };
+    static int fps_arr[32] = { 0 };
+
+    //将窗口设置的fps传入fps_arr[]
+    fps_arr[0] = ui.set_fps1->value();
+    fps_arr[1] = ui.set_fps2->value();
+
+    //实现多路（多窗口）视频的独立帧率控制与渲染
     for (int i = 0; i < views.size(); i++)
     {
+        if (fps_arr[i] <= 0)continue;
+        //计算每一帧之间应该间隔多少毫秒
+        int ms = 1000 / fps_arr[i];
+
+        //判断是否到了下一帧的渲染时间
+        if (NowMs() - last_pts[i] < ms)//未到渲染时间
+            continue;
+        last_pts[i] = NowMs();
+
         auto frame = views[i]->Read();
         if (!frame)continue;
         views[i]->DrawFrame(frame);
+
+        //显示fps
+        stringstream ss;
+        ss << "fps:" << views[i]->render_fps();
+        if (i == 0)
+        {
+            ui.fps1->setText(ss.str().c_str());
+        }
+        else if(i == 1)
+        {
+            ui.fps2->setText(ss.str().c_str());
+        }
+
+        
+
     }
 }
 
