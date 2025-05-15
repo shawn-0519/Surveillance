@@ -1,6 +1,11 @@
 #pragma once
 #include <mutex>
+#include <fstream>
 struct AVFrame;
+
+//定时器
+void MSleep(unsigned int ms);
+
 ////////////////////////////////////
 /// 视频渲染接口类
 /// 隐藏SDL实现
@@ -9,16 +14,19 @@ struct AVFrame;
 class XVideoView
 {
 public:
-	enum Format
+	enum Format //枚举的值和ffmpeg中一致
 	{
-		RGBA = 0,
-		ARGB,
-		YUV420P
+		YUV420P = 0,
+		ARGB = 25,
+		RGBA = 26,
+		BGRA = 28
 	};
 	enum Rendertype
 	{
 		SDL = 0
 	};
+
+	//实现“工厂模式”，后续添加 OpenGL、DirectX 等渲染类型
 	static XVideoView* Create(Rendertype type = SDL);
 
 	////////////////////////////////////
@@ -29,7 +37,7 @@ public:
 	/// <param name="fmt">  绘制的像素格式，默认RGBA
 	/// <param name="win_id">  窗口句柄，如果为nullptr则创建新窗口
 	/// <returns>  是否创建成功，true为成功，false为失败
-	virtual bool Init(int w, int h, Format fmt = RGBA,void *win_id = nullptr) = 0;
+	virtual bool Init(int w, int h, Format fmt = RGBA) = 0;
 	
 	////////////////////////////////////
 	/// <summary>
@@ -44,7 +52,13 @@ public:
 		const unsigned char* v, int v_pitch
 			) = 0;
 	
-	virtual bool DrawFrame(AVFrame* frame);
+	//根据格式渲染
+	bool DrawFrame(AVFrame* frame);
+
+	int render_fps() { return render_fps_; }
+
+	//打开文件
+	bool Open(std::string filepath);
 
 	//清理所有申请的资源，包括关闭窗口
 	virtual void Close() = 0;
@@ -59,13 +73,12 @@ public:
 		scale_h_ = h;
 	}
 
-	//定时器
-	void MSleep(unsigned int ms);
+	AVFrame* Read();
 
-	int render_fps() { return render_fps_; }
+	void set_win_id(void* win) { win_id_ = win; }
 
 protected:
-	
+	void* win_id_ = nullptr;
 	int render_fps_ = 0;       //显示帧率
 	long long beg_ms_ = 0;       //计时开始时间
 	int count_ = 0;              //统计显示次数
@@ -77,6 +90,9 @@ protected:
 	int scale_w_ = 0;   //显示大小
 	int scale_h_ = 0;
 
+private:
+	std::ifstream ifs_;
+	AVFrame* frame_ = nullptr;//AVFrame的空间暂时放在私有区域，确保在不确定是否给外部使用的情况下安全释放。
 
 };
 

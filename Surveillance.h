@@ -31,9 +31,12 @@ signals:
 
 public slots:
     void View();    //显示的槽函数
+    void Open(int i);
+    void Open1();
+    void Open2();
 
 private:
     std::thread th_;
-    bool is_exit_ = false;
+    bool is_exit_ = false;//处理线程退出
     Ui::SurveillanceClass ui;
 };

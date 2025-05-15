@@ -18,7 +18,7 @@ static bool InitVideo()
     is_first = false;
     if (SDL_Init(SDL_INIT_VIDEO))
     {
-        cout << SDL_GetError << endl;
+        cout << SDL_GetError() << endl;
         return false;
     }
     //设定缩放算法，解决锯齿问题,线性插值算法
@@ -26,7 +26,7 @@ static bool InitVideo()
 
     return true;
 }
-bool XSDL::Init(int w, int h, Format fmt, void* win_id)
+bool XSDL::Init(int w, int h, Format fmt)
 {
     if (w <= 0 || h <= 0)return false;
     //初始化窗口
@@ -47,7 +47,7 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
     if(!win_)
     {
         //新建窗口
-        if (!win_id)
+        if (!win_id_)
         {
             win_ = SDL_CreateWindow("",
                 SDL_WINDOWPOS_UNDEFINED,
@@ -59,12 +59,12 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
         else
         {
             //渲染到控件窗口
-            win_ = SDL_CreateWindowFrom(win_id);
+            win_ = SDL_CreateWindowFrom(win_id_);
         }
     }
     if (!win_)
     {
-        cerr << SDL_GetError << endl;
+        cerr << SDL_GetError() << endl;
         return false;
     }
 
@@ -72,7 +72,7 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
     render_ = SDL_CreateRenderer(win_, -1, SDL_RENDERER_ACCELERATED);
     if (!render_)
     {
-        cout << SDL_GetError << endl;
+        cout << SDL_GetError() << endl;
         return false;
     }
 
@@ -81,6 +81,10 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
     switch (fmt)
     {
     case XVideoView::RGBA:
+        sdl_fmt = SDL_PIXELFORMAT_RGBA32;
+        break;
+    case XVideoView::BGRA:
+        sdl_fmt = SDL_PIXELFORMAT_BGRA32;
         break;
     case XVideoView::ARGB:
         sdl_fmt = SDL_PIXELFORMAT_ARGB32;
@@ -98,7 +102,7 @@ bool XSDL::Init(int w, int h, Format fmt, void* win_id)
         w, h);                          //材质大小
     if (!texture_) 
     {
-        cerr << SDL_GetError << endl;
+        cerr << SDL_GetError() << endl;
         return false;
     }
 
@@ -134,13 +138,14 @@ bool XSDL::Draw(const unsigned char* data, int linesize)
     //将内存中的像素数据更新到SDL的纹理
     auto re = SDL_UpdateTexture(texture_, nullptr, data, linesize);
     if (re != 0) {
-        cout << SDL_GetError << endl;
+        cout << SDL_GetError() << endl;
         return false;
     }
 
     //清空当前渲染目标（通常是窗口）
     re = SDL_RenderClear(render_);
 
+    //材质复制到渲染器
     SDL_Rect rect;
     SDL_Rect* prect = nullptr;
     if (scale_w_ > 0) //用户手动设置缩放
@@ -154,7 +159,7 @@ bool XSDL::Draw(const unsigned char* data, int linesize)
     //将一个纹理（Texture）的内容复制到当前渲染目标（Renderer）
     re = SDL_RenderCopy(render_, texture_,NULL, prect);
     if (re != 0) {
-        cout << SDL_GetError << endl;
+        cout << SDL_GetError() << endl;
         return false;
     }
 
@@ -164,21 +169,21 @@ bool XSDL::Draw(const unsigned char* data, int linesize)
     return false;
 }
 
-bool XSDL::Draw(const unsigned char* y, int y_pitch, const unsigned char* u, int u_pitch, const unsigned char* v, int v_pitch)
+bool XSDL::Draw(
+    const unsigned char* y, int y_pitch, 
+    const unsigned char* u, int u_pitch, 
+    const unsigned char* v, int v_pitch)
 {
 
-    if (!y||!u||!v)return false;
+    if (!y || !u || !v)return false;
     //容错
     unique_lock<mutex> sdl_lock(mtx_);
-    if (!win_ || !render_ || !texture_ || width_ <= 0 || height_ <= 0)return false;
-
-    
-   
+    if (!texture_ || !render_ || !win_ || width_ <= 0 || height_ <= 0)return false;
 
     //将内存中的像素数据更新到SDL的纹理
     auto re = SDL_UpdateYUVTexture(texture_, NULL, y, y_pitch, u, u_pitch, v, v_pitch);
     if (re != 0) {
-        cout << SDL_GetError << endl;
+        cout << SDL_GetError() << endl;
         return false;
     }
 
@@ -198,7 +203,7 @@ bool XSDL::Draw(const unsigned char* y, int y_pitch, const unsigned char* u, int
     //将一个纹理（Texture）的内容复制到当前渲染目标（Renderer）
     re = SDL_RenderCopy(render_, texture_, NULL, prect);
     if (re != 0) {
-        cout << SDL_GetError << endl;
+        cout << SDL_GetError() << endl;
         return false;
     }
 
@@ -232,11 +237,11 @@ void XSDL::Close()
 
 bool XSDL::IsExit()
 {
-    //SDL_Event ev;
-    ////等待事件队列中出现新事件，并将事件信息写入 ev
-    //SDL_WaitEventTimeout(&ev, 1);
-    //if (ev.type == SDL_QUIT) {
-    //    return true;
-    //}
+    SDL_Event ev;
+    //等待事件队列中出现新事件，并将事件信息写入 ev
+    SDL_WaitEventTimeout(&ev, 1);
+    if (ev.type == SDL_QUIT) {
+        return true;
+    }
     return false;
 }

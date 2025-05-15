@@ -15,7 +15,7 @@ public:
 	// <param name="fmt">  绘制的像素格式，默认RGBA
 	// <param name="win_id">  窗口句柄，如果为nullptr则创建新窗口
 	// <returns>  是否创建成功，true为成功，false为失败
-	bool Init(int w, int h, Format fmt = RGBA, void* win_id = nullptr)override;
+	bool Init(int w, int h, Format fmt = RGBA)override;
 
 	////////////////////////////////////
 	// <summary>
