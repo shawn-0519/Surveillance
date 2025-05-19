@@ -101,6 +101,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="l_encode.cpp" />
+    <ClCompile Include="xencode.cpp" />
     <ClCompile Include="xsdl.cpp" />
     <ClCompile Include="xvideo_view.cpp" />
     <QtRcc Include="Surveillance.qrc" />
@@ -110,6 +112,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="xencode.h" />
     <ClInclude Include="xsdl.h" />
     <ClInclude Include="xvideo_view.h" />
   </ItemGroup>

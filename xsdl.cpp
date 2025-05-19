@@ -237,11 +237,11 @@ void XSDL::Close()
 
 bool XSDL::IsExit()
 {
-    SDL_Event ev;
-    //等待事件队列中出现新事件，并将事件信息写入 ev
-    SDL_WaitEventTimeout(&ev, 1);
-    if (ev.type == SDL_QUIT) {
-        return true;
-    }
+    //SDL_Event ev;
+    ////等待事件队列中出现新事件，并将事件信息写入 ev
+    //SDL_WaitEventTimeout(&ev, 1);
+    //if (ev.type == SDL_QUIT) {
+    //    return true;
+    //}
     return false;
 }

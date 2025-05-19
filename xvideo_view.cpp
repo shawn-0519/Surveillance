@@ -24,9 +24,7 @@ XVideoView* XVideoView::Create(Rendertype type)
 bool XVideoView::DrawFrame(AVFrame* frame)
 {
 	//容错
-	if (!frame || !frame->data[0]) {
-		return false;
-	}
+	if (!frame || !frame->data[0])return false;
 	count_++;
 	if (beg_ms_ <= 0)
 	{
@@ -36,7 +34,6 @@ bool XVideoView::DrawFrame(AVFrame* frame)
 	else if ((clock() - beg_ms_) / (CLOCKS_PER_SEC / 1000) >= 1000) //一秒计算一次fps
 	{
 		render_fps_ = count_;
-		std::cout << "fps:" << count_<<"  ";
 		count_ = 0;
 		beg_ms_ = clock();
 	}
@@ -134,8 +131,8 @@ AVFrame* XVideoView::Read()
 void MSleep(unsigned int ms)  
 {  
    auto beg = clock();  
-   for (unsigned int i = 0; i < ms; i++)
-   {  
+   for (int i = 0; i < ms; i++)
+	{ 
        this_thread::sleep_for(chrono::milliseconds(1));
        if ((clock() - beg) / (CLOCKS_PER_SEC / 1000) >= ms)
            break;  

@@ -46,12 +46,21 @@
     <ClCompile Include="xsdl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="l_encode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="xencode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="xvideo_view.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="xsdl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xencode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

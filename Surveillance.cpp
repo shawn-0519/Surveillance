@@ -83,7 +83,7 @@ void Surveillance::Main()
     while(!is_exit_)
     {
         ViewS();
-        MSleep(10);
+        MSleep(1);//夏用的10，会导致调到高帧率时，帧率小于调整数值较多的情况
     }
 }
 
